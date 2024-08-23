@@ -1273,7 +1273,7 @@ scores_mat_S1vsCCT0 <- gs_scores(
   res_enrich = res_enrich_state1vsCCT0_GT[1:500,],
   annotation_obj = anno_df
 )
-
+write_csv(scores_mat_S1vsCCT0, "results_csv/IMMERSE paper/SCRIPT 4/genetonic/scores_matrix_genetonic.csv")
 
 scores_mat_S1vsCCT0 <- scores_mat_S1vsCCT0 %>% t() %>%  as.data.frame() %>% 
   rownames_to_column("sample_id")
@@ -2696,5 +2696,157 @@ map9 <- ggplot(matrix, aes(x = PHATE1, y= PHATE2))+
 ggsave(plot = map9,"FIGURES/IMMERSE paper/SCRIPT 4/genetonic/Genes/cell division/MAP9.png", width = 5, height = 5, dpi = 300 )
 
 
+
+####################################################################################################
+
+
+#Make volcano plot for STImS 1,2 and 3 vs pre surgery
+
+
+state1vsCCT0$diffexpressed <- "NA"
+# if log2Foldchange > 0.6 and pvalue < 0.05, set as "UP" 
+state1vsCCT0$diffexpressed[state1vsCCT0$`State 1 vs pre_log2FoldChange` > 1 & state1vsCCT0$`State 1 vs pre_padj` < 0.01] <- "UP"
+# if log2Foldchange < -0.6 and pvalue < 0.05, set as "DOWN"
+state1vsCCT0$diffexpressed[state1vsCCT0$`State 1 vs pre_log2FoldChange` < -1 & state1vsCCT0$`State 1 vs pre_padj` < 0.01] <- "DOWN"
+
+#identify top 10 most significatnly altereed genes for up and down 
+genelist_STImS1_UP <- state1vsCCT0 %>% 
+  filter(diffexpressed == "UP") %>% 
+  filter(!`State 1 vs pre_log2FoldChange` > 10 ) %>% 
+  arrange(`State 1 vs pre_padj`) %>% 
+  slice(1:10)
+genelist_STImS1_UP <- genelist_STImS1_UP$hgnc_symbol
+
+genelist_STImS1_DOWN <- state1vsCCT0 %>% 
+  filter(diffexpressed == "DOWN") %>% 
+  filter(!`State 1 vs pre_log2FoldChange` < -10 ) %>% 
+  arrange(`State 1 vs pre_padj`) %>% 
+  slice(1:10)
+genelist_STImS1_DOWN <- genelist_STImS1_DOWN$hgnc_symbol
+
+genelist_STImS1 <- c(genelist_STImS1_DOWN,genelist_STImS1_UP)
+
+state1vsCCT0 <- state1vsCCT0%>%
+  mutate(plotname = as.character(hgnc_symbol)) %>% 
+  mutate(plotname = ifelse(plotname %in% genelist_STImS1, plotname, ""))
+
+STiMs1vsCC_T0 <- ggplot(state1vsCCT0, aes(x=`State 1 vs pre_log2FoldChange`, y = -log10(`State 1 vs pre_padj`), label = plotname))+
+  geom_point(aes(fill = diffexpressed), pch =21, size =3, colour = "black")+
+  scale_fill_manual(values = c("UP" ="#d8031c",
+                               "DOWN" = "#6497bf"))+
+  theme_classic()+
+  theme(legend.position = "none")+
+  xlim(-10,10)+
+  ylim(0,75)+
+  geom_label_repel(max.overlaps = 50, size = 6)+
+  geom_hline(yintercept = -log10(0.01), linetype = "dashed")+
+  geom_vline(xintercept = 1, linetype = "dashed")+
+  geom_vline(xintercept = -1, linetype = "dashed")+
+  xlab("Log2foldchange")+
+  ylab("-log10 Adj P-vlaue")
+
+ggsave(plot = STiMs1vsCC_T0, "FIGURES/IMMERSE paper/SCRIPT 4/VP/STiMs1vsCC_T0.png", width = 10, height = 10 )
+
+####################################################################################################
+####################################################################################################
+
+
+#Make volcano plot for STImS 1,2 and 3 vs pre surgery
+
+
+state2vsCCT0$diffexpressed <- "NA"
+# if log2Foldchange > 0.6 and pvalue < 0.05, set as "UP" 
+state2vsCCT0$diffexpressed[state2vsCCT0$`State 2 vs pre_log2FoldChange` > 1 & state2vsCCT0$`State 2 vs pre_padj` < 0.01] <- "UP"
+# if log2Foldchange < -0.6 and pvalue < 0.05, set as "DOWN"
+state2vsCCT0$diffexpressed[state2vsCCT0$`State 2 vs pre_log2FoldChange` < -1 & state2vsCCT0$`State 2 vs pre_padj` < 0.01] <- "DOWN"
+
+#identify top 10 most significatnly altereed genes for up and down 
+genelist_STImS2_UP <- state2vsCCT0 %>% 
+  filter(diffexpressed == "UP") %>% 
+  filter(!`State 2 vs pre_log2FoldChange` > 10 ) %>% 
+  arrange(`State 2 vs pre_padj`) %>% 
+  slice(1:10)
+genelist_STImS2_UP <- genelist_STImS2_UP$hgnc_symbol
+
+genelist_STImS2_DOWN <- state2vsCCT0 %>% 
+  filter(diffexpressed == "DOWN") %>% 
+  filter(!`State 2 vs pre_log2FoldChange`< -10) %>% 
+  arrange(`State 2 vs pre_padj`) %>% 
+  slice(1:10)
+genelist_STImS2_DOWN <- genelist_STImS2_DOWN$hgnc_symbol
+
+genelist_STImS2 <- c(genelist_STImS2_DOWN,genelist_STImS2_UP)
+
+state2vsCCT0 <- state2vsCCT0%>%
+  mutate(plotname = as.character(hgnc_symbol)) %>% 
+  mutate(plotname = ifelse(plotname %in% genelist_STImS2, plotname, ""))
+
+STiMs2vsCC_T0 <- ggplot(state2vsCCT0, aes(x=`State 2 vs pre_log2FoldChange`, y = -log10(`State 2 vs pre_padj`), label = plotname))+
+  geom_point(aes(fill = diffexpressed), pch =21, size =3, colour = "black")+
+  scale_fill_manual(values = c("UP" ="#d8031c",
+                               "DOWN" = "#6497bf"))+
+  theme_classic()+
+  theme(legend.position = "none")+
+  xlim(-10,10)+
+  ylim(0,30)+
+  geom_label_repel(max.overlaps = 50, size = 6)+
+  geom_hline(yintercept = -log10(0.01), linetype = "dashed")+
+  geom_vline(xintercept = 1, linetype = "dashed")+
+  geom_vline(xintercept = -1, linetype = "dashed")+
+  xlab("Log2foldchange")+
+  ylab("-log10 Adj P-vlaue")
+
+ggsave(plot = STiMs2vsCC_T0, "FIGURES/IMMERSE paper/SCRIPT 4/VP/STiMs2vsCC_T0.png", width = 10, height = 10 )
+
+####################################################################################################
+####################################################################################################
+
+
+#Make volcano plot for STImS 1,2 and 3 vs pre surgery
+
+
+state3vsCCT0$diffexpressed <- "NA"
+# if log2Foldchange > 0.6 and pvalue < 0.05, set as "UP" 
+state3vsCCT0$diffexpressed[state3vsCCT0$`State 3 vs pre_log2FoldChange` > 1 & state3vsCCT0$`State 3 vs pre_padj` < 0.01] <- "UP"
+# if log2Foldchange < -0.6 and pvalue < 0.05, set as "DOWN"
+state3vsCCT0$diffexpressed[state3vsCCT0$`State 3 vs pre_log2FoldChange` < -1 & state3vsCCT0$`State 3 vs pre_padj` < 0.01] <- "DOWN"
+
+#identify top 10 most significatnly altereed genes for up and down 
+genelist_STImS3_UP <- state3vsCCT0 %>% 
+  filter(diffexpressed == "UP") %>% 
+  filter(!`State 3 vs pre_log2FoldChange` > 10 ) %>% 
+  arrange(`State 3 vs pre_padj`) %>% 
+  slice(1:10)
+genelist_STImS3_UP <- genelist_STImS3_UP$hgnc_symbol
+
+genelist_STImS3_DOWN <- state3vsCCT0 %>% 
+  filter(diffexpressed == "DOWN") %>% 
+  filter(!`State 3 vs pre_log2FoldChange`< -10) %>% 
+  arrange(`State 3 vs pre_padj`) %>% 
+  slice(1:10)
+genelist_STImS3_DOWN <- genelist_STImS3_DOWN$hgnc_symbol
+
+genelist_STImS3 <- c(genelist_STImS3_DOWN,genelist_STImS3_UP)
+
+state3vsCCT0 <- state3vsCCT0%>%
+  mutate(plotname = as.character(hgnc_symbol)) %>% 
+  mutate(plotname = ifelse(plotname %in% genelist_STImS3, plotname, ""))
+
+STiMs3vsCC_T0 <- ggplot(state3vsCCT0, aes(x=`State 3 vs pre_log2FoldChange`, y = -log10(`State 3 vs pre_padj`), label = plotname))+
+  geom_point(aes(fill = diffexpressed), pch =21, size =3, colour = "black")+
+  scale_fill_manual(values = c("UP" ="#d8031c",
+                               "DOWN" = "#6497bf"))+
+  theme_classic()+
+  theme(legend.position = "none")+
+  xlim(-10,10)+
+  ylim(0,20)+
+  geom_label_repel(max.overlaps = 50, size = 6)+
+  geom_hline(yintercept = -log10(0.01), linetype = "dashed")+
+  geom_vline(xintercept = 1, linetype = "dashed")+
+  geom_vline(xintercept = -1, linetype = "dashed")+
+  xlab("Log2foldchange")+
+  ylab("-log10 Adj P-vlaue")
+
+ggsave(plot = STiMs3vsCC_T0, "FIGURES/IMMERSE paper/SCRIPT 4/VP/STiMs3vsCC_T0.png", width = 10, height = 10 )
 
 ####################################################################################################

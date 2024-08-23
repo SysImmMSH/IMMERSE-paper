@@ -198,7 +198,10 @@ ggsave(plot = diiffusionMap, "Figures/IMMERSE paper/SCRIPT 3/diiffusionMap.png",
 
 ###################################################################
 ###### choosing how many clusters of genes#########################
-
+#Save the data of the cardiac patients and sepsis patients (only the phate cordinates, timepoint Cohort_ttime, Cohort, sample_id)
+colnames(df4.1)
+save <- df4.1 %>% select(case_id, sample_id, Cohort, Cohort_time, PHATE1, PHATE2, Timepoint)
+write_csv(df4.1, "Results_csv/IMMERSE paper/SCRIPT 3/metadata of PHATE.csv")
 # first create data frame to only include sepsis patients. 
 
 df_sepsis <- df4.1 %>% filter(Cohort == "Sepsis")
